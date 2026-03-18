@@ -22,6 +22,8 @@ model Tenant {
 
   users       User[]
   leads       Lead[]
+  stock         Stock[]
+  businessDescription String?
 }
 
 // ── Users ─────────────────────────────────────────────────────────────────────
@@ -83,4 +85,25 @@ model Message {
   lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
+}
+
+// ── Stock / Inventory ─────────────────────────────────────────────────────────
+model Stock {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  price       Float?
+  category    String?
+  condition   String   @default("NEW")
+  status      String   @default("AVAILABLE")
+  quantity    Int      @default(1)
+  imageUrl    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
 }

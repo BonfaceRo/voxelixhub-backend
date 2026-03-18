@@ -13,6 +13,7 @@ const compression_1 = __importDefault(require("compression"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const leads_1 = __importDefault(require("./routes/leads"));
 const messages_1 = __importDefault(require("./routes/messages"));
+const stock_1 = __importDefault(require("./routes/stock"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 4000;
 // ── CORS ──────────────────────────────────────────────────────────────────────
@@ -40,6 +41,7 @@ app.get('/health', (req, res) => {
 app.use('/v1/auth', auth_1.default);
 app.use('/v1/leads', leads_1.default);
 app.use('/v1/messages', messages_1.default);
+app.use('/v1/stock', stock_1.default);
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });

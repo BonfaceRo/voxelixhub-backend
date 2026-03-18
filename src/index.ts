@@ -9,6 +9,7 @@ import compression from 'compression';
 import authRoutes from './routes/auth';
 import leadRoutes from './routes/leads';
 import messageRoutes from './routes/messages';
+import stockRoutes from './routes/stock';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -41,6 +42,7 @@ app.get('/health', (req, res) => {
 app.use('/v1/auth',     authRoutes);
 app.use('/v1/leads',    leadRoutes);
 app.use('/v1/messages', messageRoutes);
+app.use('/v1/stock', stockRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {
