@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Tenants (car dealerships using VoxelixHub) ────────────────────────────────
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  businessType String  @default("car_dealership")
+  email       String?
+  phone       String?
+  plan        String   @default("STARTER")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  leads       Lead[]
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         String   @default("AGENT")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  leads        Lead[]
+
+  @@unique([tenantId, email])
+}
+
+// ── Leads ─────────────────────────────────────────────────────────────────────
+model Lead {
+  id           String   @id @default(cuid())
+  tenantId     String
+  firstName    String
+  lastName     String?
+  email        String?
+  phone        String?
+  source       String   @default("WEBSITE")
+  status       String   @default("NEW")
+  score        Int      @default(0)
+  notes        String?
+  assignedToId String?
+  lastContactAt DateTime?
+  convertedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedTo   User?    @relation(fields: [assignedToId], references: [id])
+  messages     Message[]
+
+  @@index([tenantId, status])
+}
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+model Message {
+  id        String   @id @default(cuid())
+  leadId    String
+  tenantId  String?
+  direction String
+  channel   String
+  content   String
+  isAI      Boolean  @default(false)
+  aiModel   String?
+  createdAt DateTime @default(now())
+
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+}
