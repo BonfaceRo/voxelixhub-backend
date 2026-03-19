@@ -40,7 +40,8 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json({ message: 'Stock item created', item });
   } catch (error) {
-    res.status(500).json({ error: 'Something went wrong' });
+    console.error('POST /stock error:', error);
+    res.status(500).json({ error: String(error) });
   }
 });
 
