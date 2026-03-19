@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
         category:    category    || null,
         condition:   condition   || 'NEW',
         status:      status      || 'AVAILABLE',
-        quantity:    quantity    || 1,
+        quantity:    quantity    ? parseInt(quantity) : 1,
       },
     });
     res.status(201).json({ message: 'Stock item created', item });
@@ -57,7 +57,7 @@ router.put('/:id', async (req, res) => {
         category:    req.body.category    ?? existing.category,
         condition:   req.body.condition   || existing.condition,
         status:      req.body.status      || existing.status,
-        quantity:    req.body.quantity    ?? existing.quantity,
+        quantity:    req.body.quantity    ? parseInt(req.body.quantity) : existing.quantity,
       },
     });
     res.json({ message: 'Stock item updated', item });
