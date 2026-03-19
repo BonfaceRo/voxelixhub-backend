@@ -7,26 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ── Tenants (car dealerships using VoxelixHub) ────────────────────────────────
 model Tenant {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  businessType String  @default("car_dealership")
-  email       String?
-  phone       String?
-  plan        String   @default("STARTER")
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  users       User[]
-  leads       Lead[]
-  stock         Stock[]
+  id                  String      @id @default(cuid())
+  name                String
+  slug                String      @unique
+  businessType        String      @default("car_dealership")
+  email               String?
+  phone               String?
+  plan                String      @default("STARTER")
+  isActive            Boolean     @default(true)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
   businessDescription String?
+  users               User[]
+  leads               Lead[]
+  stock               Stock[]
+  campaigns           Campaign[]
+  analytics           Analytics[]
 }
 
-// ── Users ─────────────────────────────────────────────────────────────────────
 model User {
   id           String   @id @default(cuid())
   tenantId     String
@@ -38,39 +37,36 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
   tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   leads        Lead[]
 
   @@unique([tenantId, email])
 }
 
-// ── Leads ─────────────────────────────────────────────────────────────────────
 model Lead {
-  id           String   @id @default(cuid())
-  tenantId     String
-  firstName    String
-  lastName     String?
-  email        String?
-  phone        String?
-  source       String   @default("WEBSITE")
-  status       String   @default("NEW")
-  score        Int      @default(0)
-  notes        String?
-  assignedToId String?
+  id            String               @id @default(cuid())
+  tenantId      String
+  firstName     String
+  lastName      String?
+  email         String?
+  phone         String?
+  source        String               @default("WEBSITE")
+  status        String               @default("NEW")
+  score         Int                  @default(0)
+  notes         String?
+  assignedToId  String?
   lastContactAt DateTime?
-  convertedAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  assignedTo   User?    @relation(fields: [assignedToId], references: [id])
-  messages     Message[]
+  convertedAt   DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  tenant        Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedTo    User?                @relation(fields: [assignedToId], references: [id])
+  messages      Message[]
+  enrollments   CampaignEnrollment[]
 
   @@index([tenantId, status])
 }
 
-// ── Messages ──────────────────────────────────────────────────────────────────
 model Message {
   id        String   @id @default(cuid())
   leadId    String
@@ -81,13 +77,11 @@ model Message {
   isAI      Boolean  @default(false)
   aiModel   String?
   createdAt DateTime @default(now())
-
   lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
 }
 
-// ── Stock / Inventory ─────────────────────────────────────────────────────────
 model Stock {
   id          String   @id @default(cuid())
   tenantId    String
@@ -102,8 +96,95 @@ model Stock {
   metadata    Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, status])
+}
+
+model Campaign {
+  id           String               @id @default(cuid())
+  tenantId     String
+  name         String
+  description  String?
+  channel      String
+  trigger      String               @default("MANUAL")
+  triggerValue String?
+  status       String               @default("DRAFT")
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  tenant       Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  steps        CampaignStep[]
+  enrollments  CampaignEnrollment[]
+
+  @@index([tenantId, status])
+}
+
+model CampaignStep {
+  id         String        @id @default(cuid())
+  campaignId String
+  stepNumber Int
+  delayDays  Int           @default(0)
+  subject    String?
+  body       String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  campaign   Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sentLogs   CampaignLog[]
+
+  @@index([campaignId, stepNumber])
+}
+
+model CampaignEnrollment {
+  id          String        @id @default(cuid())
+  campaignId  String
+  leadId      String
+  currentStep Int           @default(1)
+  status      String        @default("ACTIVE")
+  enrolledAt  DateTime      @default(now())
+  nextSendAt  DateTime?
+  completedAt DateTime?
+  campaign    Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  lead        Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  logs        CampaignLog[]
+
+  @@unique([campaignId, leadId])
+  @@index([nextSendAt, status])
+}
+
+model CampaignLog {
+  id           String             @id @default(cuid())
+  enrollmentId String
+  stepId       String
+  channel      String
+  to           String
+  status       String             @default("SENT")
+  externalId   String?
+  sentAt       DateTime           @default(now())
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  failedReason String?
+  enrollment   CampaignEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  step         CampaignStep       @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  @@index([enrollmentId])
+  @@index([status])
+}
+
+model Analytics {
+  id              String   @id @default(cuid())
+  tenantId        String
+  date            DateTime
+  newLeads        Int      @default(0)
+  convertedLeads  Int      @default(0)
+  emailsSent      Int      @default(0)
+  emailsOpened    Int      @default(0)
+  smsSent         Int      @default(0)
+  smsDelivered    Int      @default(0)
+  aiCopyGenerated Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, date])
+  @@index([tenantId, date])
 }

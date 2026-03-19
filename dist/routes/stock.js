@@ -9,7 +9,6 @@ const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 router.use(auth_1.authMiddleware);
-// ── Get all stock ─────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
     try {
         const stock = await prisma.stock.findMany({
@@ -22,7 +21,6 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
-// ── Create stock item ─────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
     try {
         const { name, description, price, category, condition, status, quantity } = req.body;
@@ -37,16 +35,16 @@ router.post('/', async (req, res) => {
                 category: category || null,
                 condition: condition || 'NEW',
                 status: status || 'AVAILABLE',
-                quantity: quantity || 1,
+                quantity: quantity ? parseInt(quantity) : 1,
             },
         });
         res.status(201).json({ message: 'Stock item created', item });
     }
     catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+        console.error('POST /stock error:', error);
+        res.status(500).json({ error: String(error) });
     }
 });
-// ── Update stock item ─────────────────────────────────────────────────────────
 router.put('/:id', async (req, res) => {
     try {
         const existing = await prisma.stock.findFirst({
@@ -63,7 +61,7 @@ router.put('/:id', async (req, res) => {
                 category: req.body.category ?? existing.category,
                 condition: req.body.condition || existing.condition,
                 status: req.body.status || existing.status,
-                quantity: req.body.quantity ?? existing.quantity,
+                quantity: req.body.quantity ? parseInt(req.body.quantity) : existing.quantity,
             },
         });
         res.json({ message: 'Stock item updated', item });
@@ -72,7 +70,6 @@ router.put('/:id', async (req, res) => {
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
-// ── Mark as sold ──────────────────────────────────────────────────────────────
 router.patch('/:id/sold', async (req, res) => {
     try {
         const existing = await prisma.stock.findFirst({
@@ -90,7 +87,6 @@ router.patch('/:id/sold', async (req, res) => {
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
-// ── Delete stock item ─────────────────────────────────────────────────────────
 router.delete('/:id', async (req, res) => {
     try {
         const existing = await prisma.stock.findFirst({
@@ -105,14 +101,10 @@ router.delete('/:id', async (req, res) => {
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
-// ── Get available stock for AI ────────────────────────────────────────────────
 router.get('/available', async (req, res) => {
     try {
         const stock = await prisma.stock.findMany({
-            where: {
-                tenantId: req.user.tenantId,
-                status: 'AVAILABLE',
-            },
+            where: { tenantId: req.user.tenantId, status: 'AVAILABLE' },
             orderBy: { createdAt: 'desc' },
         });
         res.json({ stock });
