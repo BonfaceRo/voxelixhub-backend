@@ -61,7 +61,7 @@ ${platformInstructions}
 
 Make copy relevant to African markets. Be direct, benefit-focused, and culturally appropriate.`;
         const completion = await groq.chat.completions.create({
-            model: 'llama3-8b-8192',
+            model: 'llama-3.1-8b-instant',
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.7,
             max_tokens: 1000,
@@ -129,7 +129,7 @@ Rules:
 - ${channel === 'SMS' ? 'Keep each SMS under 160 characters' : 'Use simple HTML for email body'}
 - Make it relevant to African small businesses`;
         const completion = await groq.chat.completions.create({
-            model: 'llama3-8b-8192',
+            model: 'llama-3.1-8b-instant',
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.7,
             max_tokens: 1500,
