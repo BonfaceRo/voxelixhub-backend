@@ -16,6 +16,7 @@ const messages_1 = __importDefault(require("./routes/messages"));
 const stock_1 = __importDefault(require("./routes/stock"));
 const campaigns_1 = __importDefault(require("./routes/campaigns"));
 const ai_1 = __importDefault(require("./routes/ai"));
+const sms_1 = __importDefault(require("./routes/sms"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 4000;
 // ── CORS ──────────────────────────────────────────────────────────────────────
@@ -46,6 +47,7 @@ app.use('/v1/messages', messages_1.default);
 app.use('/v1/stock', stock_1.default);
 app.use('/v1/campaigns', campaigns_1.default);
 app.use('/v1/ai', ai_1.default);
+app.use('/v1/sms', sms_1.default);
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });
