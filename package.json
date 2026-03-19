@@ -16,6 +16,15 @@
   "description": "VoxelixHub Backend API",
   "dependencies": {
     "@prisma/client": "^5.12.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/helmet": "^0.0.48",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.5.0",
+    "@types/uuid": "^10.0.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "compression": "^1.8.1",
@@ -28,19 +37,9 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "prisma": "^5.12.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "uuid": "^13.0.0"
   },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/compression": "^1.8.1",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/helmet": "^0.0.48",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10",
-    "@types/node": "^25.5.0",
-    "@types/uuid": "^10.0.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
-  }
+  "devDependencies": {}
 }
