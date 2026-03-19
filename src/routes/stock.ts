@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 
 router.use(authMiddleware);
 
+// ── Get all stock ─────────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
     const stock = await prisma.stock.findMany({
@@ -14,16 +15,17 @@ router.get('/', async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
     res.json({ stock });
-  } } catch (error) {
-    console.error('POST /stock error:', error);
-    res.status(500).json({ error: String(error) });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
+// ── Create stock item ─────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
     const { name, description, price, category, condition, status, quantity } = req.body;
     if (!name) return res.status(400).json({ error: 'Name is required' });
+
     const item = await prisma.stock.create({
       data: {
         tenantId:    req.user!.tenantId,
@@ -43,12 +45,14 @@ router.post('/', async (req, res) => {
   }
 });
 
+// ── Update stock item ─────────────────────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
     const existing = await prisma.stock.findFirst({
       where: { id: req.params.id, tenantId: req.user!.tenantId },
     });
     if (!existing) return res.status(404).json({ error: 'Item not found' });
+
     const item = await prisma.stock.update({
       where: { id: req.params.id },
       data: {
@@ -67,12 +71,14 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// ── Mark as sold ──────────────────────────────────────────────────────────────
 router.patch('/:id/sold', async (req, res) => {
   try {
     const existing = await prisma.stock.findFirst({
       where: { id: req.params.id, tenantId: req.user!.tenantId },
     });
     if (!existing) return res.status(404).json({ error: 'Item not found' });
+
     const item = await prisma.stock.update({
       where: { id: req.params.id },
       data:  { status: 'SOLD' },
@@ -83,12 +89,14 @@ router.patch('/:id/sold', async (req, res) => {
   }
 });
 
+// ── Delete stock item ─────────────────────────────────────────────────────────
 router.delete('/:id', async (req, res) => {
   try {
     const existing = await prisma.stock.findFirst({
       where: { id: req.params.id, tenantId: req.user!.tenantId },
     });
     if (!existing) return res.status(404).json({ error: 'Item not found' });
+
     await prisma.stock.delete({ where: { id: req.params.id } });
     res.json({ message: 'Stock item deleted' });
   } catch (error) {
@@ -96,10 +104,14 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// ── Get available stock for AI ────────────────────────────────────────────────
 router.get('/available', async (req, res) => {
   try {
     const stock = await prisma.stock.findMany({
-      where: { tenantId: req.user!.tenantId, status: 'AVAILABLE' },
+      where: {
+        tenantId: req.user!.tenantId,
+        status:   'AVAILABLE',
+      },
       orderBy: { createdAt: 'desc' },
     });
     res.json({ stock });
