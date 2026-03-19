@@ -14,8 +14,9 @@ router.get('/', async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
     res.json({ stock });
-  } catch (error) {
-    res.status(500).json({ error: 'Something went wrong' });
+  } } catch (error) {
+    console.error('POST /stock error:', error);
+    res.status(500).json({ error: String(error) });
   }
 });
 
