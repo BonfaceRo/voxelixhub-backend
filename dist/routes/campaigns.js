@@ -9,7 +9,12 @@ const resend_1 = require("resend");
 const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
-const resend = new resend_1.Resend(process.env.RESEND_API_KEY);
+let resend;
+function getResend() {
+    if (!resend)
+        resend = new resend_1.Resend(process.env.RESEND_API_KEY);
+    return resend;
+}
 router.use(auth_1.authMiddleware);
 // ── Get all campaigns ─────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
@@ -161,7 +166,7 @@ router.post('/send/:enrollmentId', async (req, res) => {
                 return res.status(400).json({ error: 'Lead has no email address' });
             }
             try {
-                const { data } = await resend.emails.send({
+                const { data } = await getResend().emails.send({
                     from: 'VoxelixHub <onboarding@resend.dev>',
                     to: lead.email,
                     subject: step.subject || 'Message from us',
