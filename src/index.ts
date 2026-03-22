@@ -13,6 +13,7 @@ import stockRoutes from './routes/stock';
 import campaignRoutes from './routes/campaigns';
 import aiRoutes from './routes/ai';
 import smsRoutes from './routes/sms';
+import analyticsRoutes from './routes/analytics';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -49,6 +50,7 @@ app.use('/v1/stock', stockRoutes);
 app.use('/v1/campaigns', campaignRoutes);
 app.use('/v1/ai', aiRoutes);
 app.use('/v1/sms', smsRoutes);
+app.use('/v1/analytics', analyticsRoutes);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {
