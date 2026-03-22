@@ -24,6 +24,7 @@ model Tenant {
   stock               Stock[]
   campaigns           Campaign[]
   analytics           Analytics[]
+  prospects           Prospect[]
 }
 
 model User {
@@ -187,4 +188,26 @@ model Analytics {
 
   @@unique([tenantId, date])
   @@index([tenantId, date])
+}
+
+// ── Prospects (cold contacts for outreach) ────────────────────────────────────
+model Prospect {
+  id          String    @id @default(cuid())
+  tenantId    String
+  firstName   String
+  lastName    String?
+  phone       String?
+  email       String?
+  source      String    @default("CSV_UPLOAD")
+  status      String    @default("PENDING") // PENDING | SENT | REPLIED | CONVERTED | UNSUBSCRIBED
+  message     String?
+  sentAt      DateTime?
+  repliedAt   DateTime?
+  convertedAt DateTime?
+  leadId      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
 }
